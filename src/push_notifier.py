@@ -106,9 +106,12 @@ class PushNotifier:
             格式化后的时间字符串（如 "-2026-01-11 10:30"），如果解析失败返回空字符串
         """
         if not published or published == 'Unknown':
+            print(f"[DEBUG] Published time is empty or Unknown: '{published}'")
             return ""
 
         try:
+            print(f"[DEBUG] Parsing published time: '{published}'")
+
             # 尝试解析 RSS 时间格式（RFC 2822）
             # feedparser 会将时间解析为 time.struct_time
             import feedparser
@@ -119,28 +122,35 @@ class PushNotifier:
                 time_struct = parsed.entries[0].get('published_parsed')
                 if time_struct:
                     dt = datetime.fromtimestamp(time.mktime(time_struct))
-                    return f"-{dt.strftime('%Y-%m-%d %H:%M')}"
+                    result = f"-{dt.strftime('%Y-%m-%d %H:%M')}"
+                    print(f"[DEBUG] Successfully parsed with feedparser: {result}")
+                    return result
 
             # 如果 feedparser 解析失败，尝试其他常见格式
             # RFC 2822 格式：Sat, 11 Jan 2026 10:30:00 GMT
             try:
                 dt = datetime.strptime(published, '%a, %d %b %Y %H:%M:%S %Z')
-                return f"-{dt.strftime('%Y-%m-%d %H:%M')}"
-            except:
-                pass
+                result = f"-{dt.strftime('%Y-%m-%d %H:%M')}"
+                print(f"[DEBUG] Successfully parsed with strptime: {result}")
+                return result
+            except Exception as e:
+                print(f"[DEBUG] strptime failed: {e}")
 
             # ISO 8601 格式：2026-01-11T10:30:00Z
             try:
                 dt = datetime.fromisoformat(published.replace('Z', '+00:00'))
-                return f"-{dt.strftime('%Y-%m-%d %H:%M')}"
-            except:
-                pass
+                result = f"-{dt.strftime('%Y-%m-%d %H:%M')}"
+                print(f"[DEBUG] Successfully parsed with fromisoformat: {result}")
+                return result
+            except Exception as e:
+                print(f"[DEBUG] fromisoformat failed: {e}")
 
             # 如果所有解析都失败，返回空字符串
+            print(f"[DEBUG] All parsing methods failed for: '{published}'")
             return ""
 
         except Exception as e:
-            print(f"Failed to parse published time '{published}': {e}")
+            print(f"[ERROR] Failed to parse published time '{published}': {e}")
             return ""
 
     def send_articles_batch(self, articles: List[Dict]) -> bool:
