@@ -123,14 +123,15 @@ class AISummarizer:
         categories = []
         summary = ai_text
 
-        # 查找【标签】标记
-        tag_match = re.search(r'【标签】(.+?)(?:\n|$)', ai_text)
+        # 查找【标签】标记（改进：匹配到行尾或【总结】标记）
+        tag_match = re.search(r'【标签】(.+?)(?=【总结】|\n\n|$)', ai_text)
         if tag_match:
             tag_text = tag_match.group(1).strip()
             # 解析标签（支持顿号、逗号分隔）
             categories = re.split(r'[、,，\s]+', tag_text)
             categories = list(set([c for c in categories if c.strip()]))
             categories = categories[:5]  # 限制为 5 个
+            print(f"[DEBUG] Parsed tags from AI: {categories}")
 
         # 查找【总结】标记
         summary_match = re.search(r'【总结】\s*\n(.+)', ai_text, re.DOTALL)
@@ -138,7 +139,9 @@ class AISummarizer:
             summary = summary_match.group(1).strip()
         else:
             # 如果没有【总结】标记，去除【标签】部分
-            summary = re.sub(r'【标签】.+\n', '', ai_text).strip()
+            summary = re.sub(r'【标签】.+', '', ai_text).strip()
+
+        print(f"[DEBUG] AI response parsing - tags: {categories}, summary length: {len(summary)}")
 
         return {
             "summary": summary,

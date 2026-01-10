@@ -195,9 +195,13 @@ class PushNotifier:
 
             # 分类标签
             categories = article.get('categories', [])
+            print(f"[DEBUG] Article {i} categories: {categories}")
             if categories:
                 category_str = "、".join(categories)
                 content += f"🏷️ {category_str}\n\n"
+                print(f"[DEBUG] Added tags to content: 🏷️ {category_str}")
+            else:
+                print(f"[DEBUG] No tags found for article {i}")
 
             # 根据文章类型添加内容
             noise_level = article.get('noise_level')

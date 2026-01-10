@@ -62,10 +62,18 @@ class RSSParser:
         # 提取文章信息
         articles = []
         for entry in feed.entries:
+            # 尝试多个时间字段
+            published_time = (
+                entry.get('published') or
+                entry.get('updated') or
+                entry.get('pubDate') or
+                'Unknown'
+            )
+
             article = {
                 'title': entry.title,
                 'link': entry.link,
-                'published': entry.get('published', 'Unknown'),
+                'published': published_time,
                 'author': entry.get('author', 'Unknown'),  # 公众号名称
                 'content': self._extract_content(entry)
             }
