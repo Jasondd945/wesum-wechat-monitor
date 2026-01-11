@@ -56,14 +56,23 @@ jobs:
         }
         EOF
 
+    # 下载上次的已推送文章记录
+    - name: Download previous data
+      uses: actions/download-artifact@v4
+      continue-on-error: true  # 第一次运行时没有文件，不报错
+      with:
+        name: wesum-data
+        path: data/
+
     - name: Run WeSum
       run: python main.py
 
     - name: Upload data files
       uses: actions/upload-artifact@v4
+      if: always()  # 无论成功失败都上传
       with:
         name: wesum-data
         path: |
           data/
           logs/
-        retention-days: 7
+        retention-days: 90

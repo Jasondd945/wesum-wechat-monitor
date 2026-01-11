@@ -82,31 +82,42 @@ class ArticleClassifier:
         Returns:
             匹配结果
         """
-        matched_types = []
-        total_keywords = 0
-        matched_keywords = 0
+        best_match_type = None
+        best_match_count = 0
+        best_match_total = 0
 
         for noise_type, keywords in self.noise_keywords.items():
             type_count = 0
             for keyword in keywords:
-                total_keywords += 1
                 if keyword in text:
-                    matched_keywords += 1
                     type_count += 1
+                    print(f"[DEBUG] Found keyword: '{keyword}' in type: {noise_type}")
 
+            # 计算该类型的匹配率
             if type_count > 0:
-                matched_types.append(noise_type)
+                match_rate = type_count / len(keywords)
+                print(f"[DEBUG] Type '{noise_type}': matched {type_count}/{len(keywords)} keywords, rate={match_rate:.2f}")
 
-        # 计算置信度
-        confidence = matched_keywords / total_keywords if total_keywords > 0 else 0
+                # 如果这个类型的匹配数更多，或者匹配率更高，则更新最佳匹配
+                if type_count > best_match_count or (type_count == best_match_count and match_rate > best_match_total):
+                    best_match_type = noise_type
+                    best_match_count = type_count
+                    best_match_total = match_rate
 
-        # 确定主要的干扰类型
-        noise_type = matched_types[0] if matched_types else None
+        # 计算置信度：基于最佳匹配类型的匹配数（至少2个关键词才算）
+        # 阈值调整为：匹配关键词数 >= 2，或者匹配率 >= 0.3
+        confidence = 0
+        if best_match_count >= 2:
+            confidence = 0.9  # 匹配2个以上关键词，高置信度
+        elif best_match_count == 1 and best_match_total > 0:
+            confidence = 0.5  # 匹配1个关键词，中等置信度
+
+        print(f"[DEBUG] Best match: '{best_match_type}' with {best_match_count} keywords, confidence={confidence}")
 
         return {
-            "categories": matched_types,
+            "categories": [best_match_type] if best_match_type else [],
             "confidence": confidence,
-            "noise_type": noise_type
+            "noise_type": best_match_type
         }
 
     def _get_noise_level(self, noise_type: str) -> str:

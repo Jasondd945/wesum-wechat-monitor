@@ -175,9 +175,14 @@ class PushNotifier:
         title = f"{self.title_prefix} 公众号摘要汇总（{len(articles)}篇）"
 
         # 构建汇总内容
-        from datetime import datetime
+        from datetime import datetime, timezone, timedelta
+
+        # 使用北京时间（UTC+8）
+        beijing_tz = timezone(timedelta(hours=8))
+        now_beijing = datetime.now(beijing_tz)
+
         content = f"📰 本次更新：共 {len(articles)} 篇文章\n"
-        content += f"🕐 更新时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+        content += f"🕐 更新时间：{now_beijing.strftime('%Y-%m-%d %H:%M')}\n\n"
         content += "━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
         # 遍历每篇文章
