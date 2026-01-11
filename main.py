@@ -12,9 +12,8 @@ from datetime import datetime
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from rss_parser import RSSParser
-from ai_summarizer import AISummarizer
+from ai_processor import AIArticleProcessor
 from push_notifier import PushNotifier
-from article_classifier import ArticleClassifier
 
 
 def load_config(config_file: str = "config.json") -> dict:
@@ -43,13 +42,10 @@ def main():
             seen_articles_file=config['storage']['seen_articles_file']
         )
 
-        ai_summarizer = AISummarizer(
+        ai_processor = AIArticleProcessor(
             api_key=config['ai']['api_key'],
-            model=config['ai']['model'],
-            max_tokens=config['ai']['max_tokens']
+            model=config['ai']['model']
         )
-
-        article_classifier = ArticleClassifier()
 
         push_notifier = PushNotifier(
             sendkey=config['push']['sendkey'],
@@ -69,45 +65,35 @@ def main():
 
         print(f"Found {len(articles)} new articles.")
 
-        # 4. 分类文章（关键词匹配）
-        print("\n[Step 4] Classifying articles...")
-        for article in articles:
-            classification = article_classifier.classify(article)
-            article['categories'] = classification['categories']
-            article['is_noise'] = classification['is_noise']
-            article['noise_type'] = classification['noise_type']
-            article['noise_level'] = classification['noise_level']
-        print("Classification completed.")
-
-        # 5. 生成摘要（根据分类使用不同的摘要方式）
-        print("\n[Step 5] Generating summaries...")
+        # 4. AI处理文章（判断广告类型 + 生成摘要和标签）
+        print("\n[Step 4] Processing articles with AI...")
         for i, article in enumerate(articles, 1):
             print(f"Processing {i}/{len(articles)}: {article['title'][:30]}...")
 
-            # 干扰文章：生成简化摘要（100字以内）
-            if article['is_noise'] and article['noise_level'] in ['noise', 'pr']:
-                summary = ai_summarizer.generate_simple_summary(article, article['noise_type'])
-                article['summary'] = summary
-                print(f"  → Simple summary ({article['noise_type']})")
-            # 正常文章：生成完整总结（500字，包含分类标签）
-            else:
-                result = ai_summarizer.generate_summary(article)
-                article['summary'] = result['summary']
-                # 如果 AI 生成了标签，使用 AI 的标签；否则保留关键词匹配的标签
-                if result['categories']:
-                    article['categories'] = result['categories']
-                print(f"  → Full summary with tags: {article['categories']}")
+            # 一次性完成: 判断广告 + 生成摘要 + 生成标签
+            result = ai_processor.process_article(article)
 
-        print("Summaries generated successfully.")
+            # 更新文章信息
+            article['summary'] = result['summary']
+            article['categories'] = result['categories']
+            article['is_noise'] = result['is_noise']
+            article['noise_type'] = result['noise_type']
+            article['noise_level'] = result['noise_level']
 
-        # 6. 批量推送到微信
-        print("\n[Step 6] Pushing to WeChat...")
+            # 打印处理结果
+            noise_info = f" ({result['noise_type']})" if result['is_noise'] else ""
+            print(f"  → Summary{noise_info} with tags: {result['categories']}")
+
+        print("AI processing completed.")
+
+        # 5. 批量推送到微信
+        print("\n[Step 5] Pushing to WeChat...")
         if push_notifier.send_articles_batch(articles):
             print(f"Batch push notification sent successfully! ({len(articles)} articles)")
         else:
             print("Failed to send push notification.")
 
-        # 7. 完成
+        # 6. 完成
         print("\n" + "=" * 60)
         print(f"WeSum completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Processed {len(articles)} articles.")

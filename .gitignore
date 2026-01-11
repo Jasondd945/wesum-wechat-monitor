@@ -10,8 +10,12 @@ env/
 config.json
 
 # 数据文件
-data/
+# 只屏蔽 data 文件夹中的特定文件，保留 seen_articles.json
+data/*.tmp
+data/*.bak
+data/*.cache
 logs/
+# 注意: data/seen_articles.json 会被提交到仓库
 
 # IDE
 .vscode/
