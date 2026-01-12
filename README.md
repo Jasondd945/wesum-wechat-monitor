@@ -51,8 +51,6 @@ cp .env.example .env
 DASHSCOPE_API_KEY=your_api_key_here
 WEBHOOK_URL=your_webhook_url_here
 GITHUB_TOKEN=your_github_token_here  # 可选
-WECHAT2RSS_DOMAIN=your_wechat2rss_domain_here
-RSS_TOKEN=your_rss_token_here
 ```
 
 #### 3. 配置公众号订阅（推荐方式）
@@ -126,8 +124,6 @@ python main.py
 | `DASHSCOPE_API_KEY` | 通义千问 API Key | ✅ |
 | `WEBHOOK_URL` | 企业微信 Webhook URL | ✅ |
 | `GITHUB_TOKEN` | GitHub Token（用于 Gist） | ❌ |
-| `WECHAT2RSS_DOMAIN` | Wechat2RSS 域名 | ✅ |
-| `RSS_TOKEN` | Wechat2RSS 访问令牌 | ✅ |
 
 ### 公众号订阅配置（config.json）
 
@@ -234,8 +230,6 @@ WeSum/
    - 添加以下 Secrets：
      - `QWEN_API_KEY`: 通义千问 API Key
      - `WEBHOOK_URL`: 企业微信 Webhook URL
-     - `WECHAT2RSS_DOMAIN`: Wechat2RSS 域名
-     - `RSS_TOKEN`: Wechat2RSS Token
      - `PERSONAL_GITHUB_TOKEN`: GitHub Token（可选，用于 Gist）
 
 3. **启用 GitHub Actions**：

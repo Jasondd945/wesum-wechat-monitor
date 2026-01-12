@@ -33,7 +33,7 @@ except ImportError:
 
 # 显示所有已设置的环境变量（调试用）
 print(f"\n🔍 [调试] 环境变量检查：")
-env_vars = ["DASHSCOPE_API_KEY", "WEBHOOK_URL", "GITHUB_TOKEN", "WECHAT2RSS_DOMAIN"]
+env_vars = ["DASHSCOPE_API_KEY", "WEBHOOK_URL", "GITHUB_TOKEN"]
 for var in env_vars:
     value = os.getenv(var, "")
     status = "✅" if value else "❌"
@@ -648,7 +648,8 @@ def format_push_message_for_gist(articles, title="公众号文章摘要汇总"):
     Returns:
         完整的文章摘要文本（Markdown 格式）
     """
-    now = datetime.now().strftime('%Y-%m-%d %H:%M')
+    # 使用北京时间（UTC+8）
+    now = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
     # 统计公众号数量
     account_names = set(article.get('author', '') for article in articles if article.get('author'))
@@ -749,9 +750,10 @@ def send_to_wechat_with_gist_link(account_name, gist_url, webhook_url, articles)
         webhook_url: 企业微信 webhook 地址
         articles: 文章列表
     """
-    now = datetime.now().strftime('%Y-%m-%d %H:%M')
+    # 使用北京时间（UTC+8）
+    now = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
-    # 构建文章列表
+    # 构建简洁的文章列表（只包含标题和链接）
     article_list = ""
     for i, article in enumerate(articles, 1):
         published_time = format_published_time(article.get('published', ''))
@@ -770,11 +772,11 @@ def send_to_wechat_with_gist_link(account_name, gist_url, webhook_url, articles)
 
 👉 **[点击查看完整摘要]({gist_url})**
 
----
+----
 **📝 文章列表**:
-{article_list}
+-{article_list}
 
----
+----
 <font color="info">WeSum AI 摘要助手</font>
 """
         }
@@ -808,7 +810,8 @@ def send_no_new_articles_message(webhook_url):
     Args:
         webhook_url: 企业微信 webhook 地址
     """
-    now = datetime.now().strftime('%Y-%m-%d %H:%M')
+    # 使用北京时间（UTC+8）
+    now = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
     message = {
         "msgtype": "markdown",
