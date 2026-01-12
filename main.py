@@ -33,7 +33,7 @@ except ImportError:
 
 # 显示所有已设置的环境变量（调试用）
 print(f"\n🔍 [调试] 环境变量检查：")
-env_vars = ["DASHSCOPE_API_KEY", "WEBHOOK_URL", "GITHUB_TOKEN", "WECHAT2RSS_DOMAIN", "RSS_TOKEN"]
+env_vars = ["DASHSCOPE_API_KEY", "WEBHOOK_URL", "GITHUB_TOKEN", "WECHAT2RSS_DOMAIN"]
 for var in env_vars:
     value = os.getenv(var, "")
     status = "✅" if value else "❌"
@@ -91,15 +91,11 @@ def load_subscriptions():
 
                 # 替换 URL 中的占位符
                 wechat2rss_domain = os.getenv("WECHAT2RSS_DOMAIN", "")
-                rss_token = os.getenv("RSS_TOKEN", "")
 
                 print(f"🔍 [调试] 环境变量状态：")
                 print(f"   - WECHAT2RSS_DOMAIN: {'已设置' if wechat2rss_domain else '未设置'}")
-                print(f"   - RSS_TOKEN: {'已设置' if rss_token else '未设置'}")
                 if wechat2rss_domain:
                     print(f"   - WECHAT2RSS_DOMAIN 值: {wechat2rss_domain}")
-                if rss_token:
-                    print(f"   - RSS_TOKEN 值: {rss_token[:10]}..." if len(rss_token) > 10 else f"   - RSS_TOKEN 值: {rss_token}")
 
                 replaced_count = 0
                 for idx, sub in enumerate(subscriptions, 1):
@@ -111,11 +107,6 @@ def load_subscriptions():
                         if "${WECHAT2RSS_DOMAIN}" in url and wechat2rss_domain:
                             url = url.replace("${WECHAT2RSS_DOMAIN}", wechat2rss_domain)
                             print(f"🔍 [调试] 订阅 {idx}: 替换 WECHAT2RSS_DOMAIN")
-
-                        # 替换 ${RSS_TOKEN}
-                        if "${RSS_TOKEN}" in url and rss_token:
-                            url = url.replace("${RSS_TOKEN}", rss_token)
-                            print(f"🔍 [调试] 订阅 {idx}: 替换 RSS_TOKEN")
 
                         sub["url"] = url
 
