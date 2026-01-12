@@ -3,6 +3,7 @@ name: WeSum Auto Runner
 on:
   schedule:
     # 每小时运行一次（UTC 时间，北京时间 +8 小时）
+    # 北京时间 9:00 = UTC 时间 1:00
     - cron: '0 * * * *'
   workflow_dispatch: # 允许手动触发
 
@@ -24,37 +25,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Create config from secrets
+    - name: Create .env from secrets
       run: |
         mkdir -p data logs
-        cat > config.json << EOF
-        {
-          "rss": {
-            "url": "${{ secrets.RSS_URL }}",
-            "update_interval": 3600
-          },
-          "ai": {
-            "provider": "qwen",
-            "api_key": "${{ secrets.QWEN_API_KEY }}",
-            "model": "qwen-turbo",
-            "max_tokens": 1000
-          },
-          "push": {
-            "provider": "serverchan",
-            "sendkey": "${{ secrets.SERVERCHAN_SENDKEY }}",
-            "title_prefix": "【WeSum】"
-          },
-          "storage": {
-            "seen_articles_file": "data/seen_articles.json",
-            "log_file": "logs/wesum.log"
-          },
-          "filters": {
-            "max_articles_per_run": null,
-            "max_hours": 24,
-            "min_summary_length": 50
-          }
-        }
+        cat > .env << EOF
+        DASHSCOPE_API_KEY=${{ secrets.QWEN_API_KEY }}
+        WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
+        GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        WECHAT2RSS_DOMAIN=${{ secrets.WECHAT2RSS_DOMAIN }}
+        RSS_TOKEN=${{ secrets.RSS_TOKEN }}
         EOF
+
+    - name: Replace placeholders in config.json
+      run: |
+        sed -i "s|\${WECHAT2RSS_DOMAIN}|${{ secrets.WECHAT2RSS_DOMAIN }}|g" config.json
+        sed -i "s|\${RSS_TOKEN}|${{ secrets.RSS_TOKEN }}|g" config.json
 
     - name: Run WeSum
       run: python main.py
@@ -64,8 +49,8 @@ jobs:
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "actions@github.com"
-        git add data/seen_articles.json || echo "No data file"
-        git add logs/ || echo "No logs"
-        git commit -m "Update seen articles [skip ci]" || echo "No changes to commit"
+        git add data/seen_articles.json || echo "No data file to commit"
+        git add logs/ || echo "No logs to commit"
+        git commit -m "chore: update seen articles [skip ci]" || echo "No changes to commit"
         git push
 
