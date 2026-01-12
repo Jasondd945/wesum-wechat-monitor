@@ -31,13 +31,28 @@
       "enabled": true
     },
     {
+      "name": "AI产品榜",
+      "url": "${WECHAT2RSS_DOMAIN}/feed/98f5e2532b707d80e06b19f585138355ac2ad89a.xml?token=${RSS_TOKEN}",
+      "enabled": true
+    },
+    {
       "name": "AI科技评论",
       "url": "${WECHAT2RSS_DOMAIN}/feed/abef684cb5915667676e9621e456e407f5ca5ac3.xml?token=${RSS_TOKEN}",
       "enabled": true
     },
     {
-      "name": "AI产品",
-      "url": "${WECHAT2RSS_DOMAIN}/feed/98f5e2532b707d80e06b19f585138355ac2ad89a.xml?token=${RSS_TOKEN}",
+      "name": "机器之心",
+      "url": "${WECHAT2RSS_DOMAIN}/feed/26a5c4068e226a48bc133c26dbc2e2ea2f3bbd33.xml?token=${RSS_TOKEN}",
+      "enabled": true
+    },
+    {
+      "name": "火星研究社",
+      "url": "${WECHAT2RSS_DOMAIN}/feed/dfe263f42cd07f4f83829e483836c2d3ef159bf7.xml?token=${RSS_TOKEN}",
+      "enabled": true
+    },
+    {
+      "name": "小睿睿投资学",
+      "url": "${WECHAT2RSS_DOMAIN}/feed/9853193513c15599f7ebb6d24349dcf9f6f67673.xml?token=${RSS_TOKEN}",
       "enabled": true
     }
   ],

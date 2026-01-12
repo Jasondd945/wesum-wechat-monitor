@@ -816,6 +816,14 @@ def main():
 
     if not all_articles:
         print("\n❌ 没有获取到任何新文章")
+
+        # 检查当前时间是否在静默时段（0-9点）
+        current_hour = datetime.now().hour
+        if 0 <= current_hour < 9:
+            print(f"\n⏰ 当前时间 {current_hour}:00 处于静默时段（0-9点），跳过空消息推送")
+            print("\n✅ 运行完成（静默时段，无新文章）")
+            exit(0)
+
         print("\n[Step 4] 发送无新文章通知...")
         send_no_new_articles_message(WEBHOOK_URL)
         print("\n✅ 运行完成（无新文章需要处理）")
