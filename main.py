@@ -320,6 +320,10 @@ class AIArticleProcessor:
             if response.status_code == 200:
                 ai_text = response.output.text.strip()
 
+                # 调试：打印 AI 原始返回的前 200 个字符
+                print(f"       [DEBUG] AI 原始返回（前200字符）:")
+                print(f"       {ai_text[:200]}...")
+
                 # 提取【总结】部分
                 import re
                 summary_match = re.search(r'【总结】\s*\n(.+)', ai_text, re.DOTALL)
@@ -330,7 +334,16 @@ class AIArticleProcessor:
                 else:
                     # 如果没有【总结】标记，去除【标签】部分
                     summary = re.sub(r'【标签】.+', '', ai_text)
-                    return summary.lstrip().rstrip()
+                    summary = summary.lstrip().rstrip()
+
+                    # 调试：检查是否提取成功
+                    if not summary or len(summary) < 50:
+                        print(f"       ⚠️  警告：摘要过短或为空，AI 可能未按预期生成")
+                        print(f"       [DEBUG] 完整 AI 返回:")
+                        print(f"       {ai_text}")
+                        return content[:500] + "..."
+
+                    return summary
 
         except Exception as e:
             print(f"摘要生成失败：{str(e)}")
