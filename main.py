@@ -706,7 +706,8 @@ def send_to_wechat_with_gist_link(account_name, gist_url, webhook_url, articles)
 
     # 如果文章超过10篇，添加省略号提示
     if len(articles) > 10:
-        article_list += f"\n... 还有 {len(articles) - 10} 篇文章，点击查看完整摘要\n"
+        article_list += f"\n... 还有 {len(articles) - 10} 篇文章\n"
+        article_list += f"\n👉 **[点击查看完整摘要]({gist_url})**\n"
 
     message = {
         "msgtype": "markdown",
