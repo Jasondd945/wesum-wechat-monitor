@@ -110,7 +110,7 @@ RSS_SUBSCRIPTIONS = load_subscriptions()
 class AIArticleProcessor:
     """AI 文章处理器"""
 
-    def __init__(self, api_key: str, model: str = "qwen-turbo"):
+    def __init__(self, api_key: str, model: str = "qwen-plus"):
         dashscope.api_key = api_key
         self.model = model
         self.noise_keywords = self._default_noise_keywords()
@@ -693,13 +693,20 @@ def send_to_wechat_with_gist_link(account_name, gist_url, webhook_url, articles)
     # 使用北京时间（UTC+8）
     now = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
-    # 构建简洁的文章列表（只包含标题和链接）
+    # 构建简洁的文章列表（只包含标题和链接，最多显示10篇）
     article_list = ""
-    for i, article in enumerate(articles, 1):
+    display_count = min(10, len(articles))  # 最多显示10篇
+
+    for i in range(display_count):
+        article = articles[i]
         published_time = format_published_time(article.get('published', ''))
         author = article.get('author', '')
         author_tag = f"【{author}】" if author else ""
-        article_list += f"{i}. {author_tag}[{article['title']}]({article['link']}){published_time}\n"
+        article_list += f"{i+1}. {author_tag}[{article['title']}]({article['link']}){published_time}\n"
+
+    # 如果文章超过10篇，添加省略号提示
+    if len(articles) > 10:
+        article_list += f"\n... 还有 {len(articles) - 10} 篇文章，点击查看完整摘要\n"
 
     message = {
         "msgtype": "markdown",
