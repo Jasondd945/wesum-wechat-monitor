@@ -26,21 +26,8 @@ from dashscope import Generation
 try:
     from dotenv import load_dotenv
     load_dotenv()
-    print(f"✅ .env 文件加载成功（如果存在）")
 except ImportError:
-    print(f"⚠️  python-dotenv 未安装，跳过 .env 加载")
     pass  # python-dotenv 未安装，跳过
-
-# 显示所有已设置的环境变量（调试用）
-print(f"\n🔍 [调试] 环境变量检查：")
-env_vars = ["DASHSCOPE_API_KEY", "WEBHOOK_URL", "GITHUB_TOKEN"]
-for var in env_vars:
-    value = os.getenv(var, "")
-    status = "✅" if value else "❌"
-    print(f"   {status} {var}: {'已设置' if value else '未设置'}")
-    if var == "WECHAT2RSS_DOMAIN" and value:
-        print(f"      值: {value}")
-print()
 
 # 通义千问 API Key（必需）
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
@@ -68,64 +55,19 @@ def load_subscriptions():
     从 config.json 加载公众号订阅配置
 
     优先级：config.json > 环境变量 > 默认配置
-
-    自动替换 URL 中的占位符：
-    - ${WECHAT2RSS_DOMAIN} → 环境变量 WECHAT2RSS_DOMAIN
-    - ${RSS_TOKEN} → 环境变量 RSS_TOKEN
     """
-    print(f"🔍 [调试] load_subscriptions() 开始执行")
-    print(f"🔍 [调试] 当前工作目录：{os.getcwd()}")
-
     # 方案 1: 从 config.json 加载（推荐）
     config_file = "config.json"
-    print(f"🔍 [调试] 检查配置文件：{config_file}")
-    print(f"🔍 [调试] 文件是否存在：{os.path.exists(config_file)}")
 
     if os.path.exists(config_file):
         try:
-            print(f"🔍 [调试] 开始读取 config.json...")
             with open(config_file, 'r', encoding='utf-8') as f:
                 config = json.load(f)
                 subscriptions = config.get("rss_subscriptions", [])
-                print(f"🔍 [调试] 读取到 {len(subscriptions)} 个订阅配置")
-
-                # 替换 URL 中的占位符
-                wechat2rss_domain = os.getenv("WECHAT2RSS_DOMAIN", "")
-
-                print(f"🔍 [调试] 环境变量状态：")
-                print(f"   - WECHAT2RSS_DOMAIN: {'已设置' if wechat2rss_domain else '未设置'}")
-                if wechat2rss_domain:
-                    print(f"   - WECHAT2RSS_DOMAIN 值: {wechat2rss_domain}")
-
-                replaced_count = 0
-                for idx, sub in enumerate(subscriptions, 1):
-                    if "url" in sub:
-                        original_url = sub["url"]
-                        url = sub["url"]
-
-                        # 替换 ${WECHAT2RSS_DOMAIN}
-                        if "${WECHAT2RSS_DOMAIN}" in url and wechat2rss_domain:
-                            url = url.replace("${WECHAT2RSS_DOMAIN}", wechat2rss_domain)
-                            print(f"🔍 [调试] 订阅 {idx}: 替换 WECHAT2RSS_DOMAIN")
-
-                        sub["url"] = url
-
-                        if original_url != url:
-                            replaced_count += 1
-
-                        # 显示前3个订阅的URL详情
-                        if idx <= 3:
-                            print(f"🔍 [调试] 订阅 {idx}: {sub['name']}")
-                            print(f"   原始URL: {original_url[:80]}...")
-                            print(f"   最终URL: {url[:80]}...")
-
-                print(f"🔍 [调试] 共替换了 {replaced_count} 个占位符")
                 print(f"✅ 从 config.json 加载了 {len(subscriptions)} 个公众号配置")
                 return subscriptions
         except Exception as e:
             print(f"⚠️ 读取 config.json 失败: {e}")
-            import traceback
-            traceback.print_exc()
 
     # 方案 2: 从环境变量加载（备用方案）
     # 格式：RSS_1_NAME, RSS_1_URL, RSS_1_ENABLED
@@ -435,8 +377,7 @@ def format_published_time(published: str) -> str:
         from email.utils import parsedate_to_datetime
         dt = parsedate_to_datetime(published)
         return f"-{dt.strftime('%Y-%m-%d %H:%M')}"
-    except Exception as e:
-        print(f"[DEBUG] 时间解析失败: {published}, 错误: {e}")
+    except:
         return ""
 
 
@@ -489,14 +430,11 @@ def fetch_rss_articles(url, seen_links: set = None, max_hours: int = 24):
         seen_links = set()
 
     print(f"正在获取 RSS：{url}")
-    print(f"🔍 调试信息：URL 长度 = {len(url)}")
-    print(f"🔍 调试信息：seen_links 数量 = {len(seen_links)}")
 
     import feedparser
     import re
 
     try:
-        print(f"🔍 调试信息：开始解析 RSS...")
         feed = feedparser.parse(url)
         time_threshold = datetime.now() - timedelta(hours=max_hours)
 
@@ -504,7 +442,6 @@ def fetch_rss_articles(url, seen_links: set = None, max_hours: int = 24):
         print(f"📰 公众号：{feed.feed.get('title', 'Unknown')}")
         print(f"📊 RSS 文章总数：{len(feed.entries)}")
         print(f"⏰ 时间范围：最近 {max_hours} 小时")
-        print(f"🔍 调试信息：时间阈值 = {time_threshold}")
         print()
 
         # 提取文章信息
@@ -512,8 +449,6 @@ def fetch_rss_articles(url, seen_links: set = None, max_hours: int = 24):
         new_count = 0
         skipped_seen = 0
         skipped_time = 0
-
-        print(f"🔍 调试信息：开始遍历 {len(feed.entries)} 篇文章...")
 
         for idx, entry in enumerate(feed.entries, 1):
             article = {
@@ -527,17 +462,12 @@ def fetch_rss_articles(url, seen_links: set = None, max_hours: int = 24):
             # 检查1: 是否已推送
             if article['link'] in seen_links:
                 skipped_seen += 1
-                if idx <= 3:  # 只显示前3篇的详情
-                    print(f"   🔍 调试：文章已推送，跳过")
                 continue
 
             # 检查2: 是否在时间范围内
             is_within_time = _is_within_time_range(entry, time_threshold)
             if not is_within_time:
                 skipped_time += 1
-                if idx <= 3:  # 只显示前3篇的详情
-                    print(f"   🔍 调试：文章不在时间范围内，跳过")
-                    print(f"      文章时间：{article['published']}")
                 continue
 
             # 提取内容
@@ -572,9 +502,6 @@ def fetch_rss_articles(url, seen_links: set = None, max_hours: int = 24):
 
     except Exception as e:
         print(f"❌ 获取 RSS 失败：{str(e)}")
-        import traceback
-        print(f"🔍 错误详情：")
-        traceback.print_exc()
         return []
 
 
@@ -980,6 +907,15 @@ def main():
         )
         article['ai_summary'] = summary
         print(f"       ✅ 摘要生成完成")
+
+        # 打印完整的 AI 摘要内容（便于调试）
+        print()
+        print("       📝 摘要内容：")
+        print("       " + "=" * 56)
+        # 打印摘要，每行前面加缩进
+        for line in summary.split('\n'):
+            print(f"       {line}")
+        print("       " + "=" * 56)
 
         processed_articles.append(article)
         print()

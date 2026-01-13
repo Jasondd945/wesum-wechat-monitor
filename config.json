@@ -54,6 +54,26 @@
       "name": "小睿睿投资学",
       "url": "https://wec.zeabur.app/feed/9853193513c15599f7ebb6d24349dcf9f6f67673.xml",
       "enabled": true
+    },
+    {
+      "name": "APPSO",
+      "url": "https://wec.zeabur.app/feed/9da805ac9714a8337326de325ef166f90c4373f7.xml",
+      "enabled": true
+    },
+    {
+      "name": "IT之家",
+      "url": "https://wec.zeabur.app/feed/e99f8a1ccec104f8f12c2090e72dbc5a05e2074c.xml",
+      "enabled": true
+    },
+    {
+      "name": "MindCode",
+      "url": "https://wec.zeabur.app/feed/51ff48a6706d9523dc869a0dc60c05b7f182dcee.xml",
+      "enabled": true
+    },
+    {
+      "name": "行业报告研究院",
+      "url": "https://wec.zeabur.app/feed/07a278f158b3bc8b3b39e64fac6352c595667230.xml",
+      "enabled": true
     }
   ],
   "filters": {

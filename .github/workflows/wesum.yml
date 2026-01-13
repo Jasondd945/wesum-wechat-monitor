@@ -3,7 +3,11 @@ name: WeSum Auto Runner
 on:
   schedule:
     # 每小时运行一次（UTC 时间，北京时间 +8 小时）
+    # 北京时间 8:00 = UTC 时间 0:00
     # 北京时间 9:00 = UTC 时间 1:00
+    # 北京时间 10:00 = UTC 时间 2:00
+    # 北京时间 11:00 = UTC 时间 3:00
+    # GitHub Actions 有时会延迟，这是正常现象
     - cron: '0 * * * *'
   workflow_dispatch: # 允许手动触发
 
